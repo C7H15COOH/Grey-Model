@@ -1,0 +1,76 @@
+close all
+clear
+clc
+tic
+
+%% 数据输入
+plateIndexTable = readtable('板块指数 2019-04-01至2021-05-28.xlsx','Sheet','板块指数','ReadVariableNames',true);
+timeSeriesData = plateIndexTable{20:end,4};
+rawData = timeSeriesData(1:489);
+m = 64;                             % 向后预测m个值
+
+%% 生成序列并建立GM(1,1)模型
+syms a b;
+n=length(rawData);                  % 原始数据个数
+Ago=cumsum(rawData);                % 原始数据一次累加,得到1-AGO序列xi(1)。
+for k=1:(n-1)
+    Z(k)=(Ago(k)+Ago(k+1))/2;       % Z(i)为xi(1)的紧邻均值生成序列
+end
+Yn =rawData;                        % Yn为常数项向量
+Yn(1)=[];                           % 从第二个数开始，即x(2),x(3)...
+Yn=Yn';                             % 将Yn变为行向量
+B=[-Z;ones(1,n-1)]';                % 累加生成数据做均值
+c=(B'*B)\(B'*Yn');                  % 利用公式求出a，b
+c= c';
+a=c(1);                             % 得到a的值
+b=c(2);                             % 得到b的值
+whiteModel=[];
+whiteModel(1)=rawData(1);
+for k=2:(n)
+    whiteModel(k)=(rawData(1)-b/a)/exp(a*(k-1))+b/a;    % 求出GM(1,1)模型公式
+end
+xi1Forecast=[];
+xi1Forecast(1)=rawData(1);
+for k=2:(n)
+    xi1Forecast(k)=whiteModel(k)-whiteModel(k-1);       % 两者做差还原原序列，得到预测数据
+end
+
+%% 对未来m个值进行预测
+mForecast=[];                                           % 存放预测后的m个值
+% rawData=[rawData;timeSeriesData((n+1):(n+m))];        % 在原始数据后追加m个值
+for k1=(n+1):(n+m)
+    xi1Forecast(end+1)=(rawData(1)-b/a)/exp(a*(k1-1))+b/a-((rawData(1)-b/a)/exp(a*(k1-1-1))+b/a);
+    mForecast(end+1)=xi1Forecast(end);
+end
+
+% %% 后验差检验
+% e=rawData-xi1Forecast;
+% q=e/(rawData');                     % 相对误差
+% for k1=(n+1):(n+m)
+%     q(end+1)=(xi1Forecast(k1-1)-rawData(k1-1))/rawData(k1-1);%在原始数据预测误差后追加新预测值误差
+% end
+% s1=var(rawData);
+% s2=var(e);
+% c=s2/s1;                            % 方差比
+% len=length(e);
+% p=0;                                % 小误差概率
+% for i=1:len
+%     if(abs(e(i))<0.6745*s1)
+%         p=p+1;
+%     end
+% end
+% p=p/len;
+
+%% 绘制预测结果
+t1=1:n+m;
+t2=1:n+m;
+plot(1:n,rawData(1:n),'s-.','LineWidth',0.8,'MarkerIndices',1:20:rawData,'MarkerSize',6);
+hold on;
+plot(t2,xi1Forecast,'o-','LineWidth',0.8,'MarkerIndices',1:20:rawData,'MarkerSize',6);
+plot(n+1:n+length(mForecast),mForecast,'c-')
+title('预测结果');
+xlabel('天数')
+ylabel('板块指数')
+legend('真实值','预测值');
+hold off
+box off
