@@ -17,7 +17,7 @@ dataSequence = sampleData;                  % dataSequence必须为向量
 dataSequence = dataSequence(:);             % 将原始数据强制转换为列向量
 
 % 创建时间序列，用于绘制时间轴，可从文件读取
-timeSeries = 1:length(dataSequence);        % 可以为datetime格式
+timeAxis = 1:length(dataSequence);        % 可以为datetime格式
 
 % 向后预测m个值
 m = 10;
@@ -97,20 +97,20 @@ fprintf('后验差\t\tc = %f\n\n',c)
 fig_GM_1_1 = figure;
 
 % 绘制原始序列图像
-tdata = timeSeries;                                 % 指定时间轴范围
+tdata = timeAxis;                                   % 指定时间轴范围
 ydata = dataSequence;                               % 指定数据范围
 plot(tdata,ydata,...
     '-','Color','#808080','LineWidth',0.6,'MarkerSize',4,'MarkerIndices',1:5:length(tdata))
 hold on
 
 % 绘制拟合序列图像
-tdata = timeSeries;                                 % 指定时间轴范围
+tdata = timeAxis;                                   % 指定时间轴范围
 ydata = xi1Forecast(1:dataLength);                  % 指定数据范围
 plot(tdata,ydata,...
     '--','Color','#0072BD','LineWidth',0.8,'MarkerSize',5,'MarkerIndices',1:5:length(tdata))
 
 % 绘制预测数据图像
-tdata = timeSeries(end):timeSeries(end)+m;          % 指定x轴显示范围
+tdata = timeAxis(end):timeAxis(end)+m;              % 指定x轴显示范围
 ydata = xi1Forecast(dataLength:dataLength+m);       % 指定数据范围
 plot(tdata,ydata,...
     '^--','Color','#D95319','LineWidth',0.8,'MarkerSize',4,'MarkerIndices',1:5:length(tdata))
