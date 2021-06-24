@@ -110,7 +110,7 @@ plot(tdata,ydata,...
     '--','Color','#0072BD','LineWidth',0.8,'MarkerSize',5,'MarkerIndices',1:5:length(tdata))
 
 % 绘制预测数据图像
-tdata = timeAxis(end):timeAxis(end)+m;              % 指定x轴显示范围
+tdata = timeAxis(end):timeAxis(end)+m;              % 指定时间轴显示范围
 ydata = xi1Forecast(dataLength:dataLength+m);       % 指定数据范围
 plot(tdata,ydata,...
     '^--','Color','#D95319','LineWidth',0.8,'MarkerSize',4,'MarkerIndices',1:5:length(tdata))
